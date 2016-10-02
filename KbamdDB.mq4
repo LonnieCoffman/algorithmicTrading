@@ -1,10 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                      KbamdDB.mq4 |
-//|                        Copyright 2015, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
+//|                                   Copyright 2015, Lonnie Coffman |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2015, MetaQuotes Software Corp."
-#property link      "https://www.mql5.com"
+#property copyright "Copyright 2015, Lonnie Coffman"
 #property version   "1.00"
 #property strict
 
@@ -42,9 +40,9 @@ struct pairinf {
    string   Strategy;
    datetime TradeTime;
    double   TradePrice;
-   
+
    string   ManualAuto;
-   
+
    int      NitroGlobal;
    string   NitroGlobalDirection;
    int      NitroTitan;
@@ -69,7 +67,7 @@ struct pairinf {
    int      NitroWPR2;
    double   NitroOBPercentage; // overbought oversold Percentage
    double   NitroOSPercentage;
-   
+
    string   M15Trend;
    string   H1Trend;
    string   H4Trend;
@@ -91,9 +89,9 @@ int   y_axis = 70;
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit(){
-   
+
    EventSetTimer(1);
-   
+
    ArrayResize(PairInfo,ArraySize(TradePairs));
    for(int i=0;i<ArraySize(TradePairs);i++){
       PairInfo[i].Pair           = TradePairs[i];
@@ -106,30 +104,30 @@ int OnInit(){
       PairInfo[i].LockProfit     = -1;
       PairInfo[i].TradePrice     = 0;
    }
-   
+
    // ensure that all pairs are loaded in market watch window.
    for(int i=0;i<ArraySize(PairInfo);i++){
       SymbolSelect(PairInfo[i].Pair, true);
    }
-   
+
    NitroChartID = GetNitroChartID();
 
    // load dashboard framework
    SetPanel("BP",0,x_axis-1,y_axis-55,1415,475,clrBlack,clrBlack,1);
    SetPanel("AccountBar",0,x_axis-2,y_axis-55,1415,26,C'34,34,34',LineColor,1);
-   
+
    SetPanel("HeaderBar",0,x_axis-2,y_axis-29,1415,26,C'136,136,136',LineColor,1);
-   
+
    SetText("AccountBalance","Account Balance: $000.00",x_axis+71,y_axis-50,C'136,136,136',7);
    SetText("AccountEquity","Equity: $000.00",x_axis+305,y_axis-50,C'136,136,136',7);
    SetText("AccountMargin","Margin Used / Avail: $000.00 / $000.00",x_axis+530,y_axis-50,C'136,136,136',7);
    SetText("AccountRealPL","Realized P/L: $000.00",x_axis+815,y_axis-50,C'136,136,136',7);
    SetText("AccountUnrealPL","Unrealized P/L: $000.00",x_axis+1000,y_axis-50,C'136,136,136',7);
-   
+
    SetPanel("ExpertActive",0,x_axis+9,y_axis-18,8,8,C'53,53,38',C'85,85,85',1);
    SetPanel("LiveTrading",0,x_axis+22,y_axis-18,8,8,C'53,53,38',C'85,85,85',1);
    SetPanel("AutoTrading",0,x_axis+34,y_axis-18,8,8,C'53,53,38',C'85,85,85',1);
-   
+
    SetText ("SpreadLabel","Spread",x_axis+71,y_axis-22,C'68,68,68',7);
    SetText ("GlobalLabel","Global %",x_axis+120,y_axis-22,C'68,68,68',7);
    SetText ("TitanLabel","Titan %",x_axis+175,y_axis-22,C'68,68,68',7);
@@ -143,7 +141,7 @@ int OnInit(){
    SetText ("OvsLabel","OvS%",x_axis+463,y_axis-22,C'68,68,68',7);
    SetText ("OvbLabel","OvB%",x_axis+501,y_axis-22,C'68,68,68',7);
    SetText ("HTFTrendLabel","HTF Trend",x_axis+554,y_axis-22,C'68,68,68',7);
-   
+
    SetText ("LotsLabel","Units",x_axis+832,y_axis-29,C'68,68,68',7);
    SetText ("LotsBuyLabel","Buy",x_axis+815,y_axis-18,C'68,68,68',7);
    SetText ("LotsSellLabel","Sell",x_axis+853,y_axis-18,C'68,68,68',7);
@@ -152,19 +150,19 @@ int OnInit(){
    SetText ("OrdersSellLabel","Sell",x_axis+921,y_axis-18,C'68,68,68',7);
    SetText ("BuyPriceLabel","Buy",x_axis+962,y_axis-18,C'68,68,68',7);
    SetText ("SellPriceLabel","Sell",x_axis+1010,y_axis-18,C'68,68,68',7);
-   
+
    SetPanel("PandLBox",0,x_axis+1063,y_axis-27,54,22,clrBlack,clrNONE,1);
    SetText ("PandLText","0.00",x_axis+1069,y_axis-24,C'68,68,68',8);
    SetPanel("LockBox",0,x_axis+1127,y_axis-27,54,22,clrBlack,clrNONE,1);
    SetText ("LockText","0.00",x_axis+1132,y_axis-24,C'68,68,68',8);
-   
+
    SetText ("LockProfitsLabel","Lock Profits",x_axis+1217,y_axis-22,C'68,68,68',7);
    ButtonCreate("Btn_Manual"," M",x_axis+1363,y_axis-23,22,16,C'136,136,136',C'53,53,38',C'85,85,85',7);
    ButtonCreate("Btn_Auto"," A",x_axis+1388,y_axis-23,22,16,C'136,136,136',C'53,53,38',C'85,85,85',7);
-   
+
    for(int i=0;i<ArraySize(PairInfo);i++){
       SetPanel(PairInfo[i].Pair+"_BG",0,x_axis-2,(i*26)+y_axis-5,1415,25,clrBlack,LineColor,1);
-      
+
       SetText(PairInfo[i].Pair+"_Label",PairInfo[i].Pair,x_axis,(i*26)+y_axis+2,clrBlanchedAlmond,8);
       SetText(PairInfo[i].Pair+"_Spread","0.0",x_axis+80,(i*26)+y_axis+2,C'68,68,68',8);
       SetText(PairInfo[i].Pair+"_Global","000",x_axis+126,(i*26)+y_axis+2,C'68,68,68',8);
@@ -186,12 +184,12 @@ int OnInit(){
       BitmapCreate(PairInfo[i].Pair+"_H1Arrow",Neutral,x_axis+568,(i*26)+y_axis+3);
       BitmapCreate(PairInfo[i].Pair+"_H4Arrow",Neutral,x_axis+586,(i*26)+y_axis+3);
       BitmapCreate(PairInfo[i].Pair+"_D1Arrow",Neutral,x_axis+604,(i*26)+y_axis+3);
-      
+
       ButtonCreate("Btn_Chart_"+PairInfo[i].Pair,"CH",x_axis+627,(i*26)+y_axis-1,25,18,C'155,155,140',C'45,83,121',clrBlack,8);
       SetText(PairInfo[i].Pair+"_Label2",PairInfo[i].Pair,x_axis+657,(i*26)+y_axis+2,C'85,85,85',8);
       ButtonCreate("Btn_Buy_"+PairInfo[i].Pair,"BUY",x_axis+715,(i*26)+y_axis-1,43,18,C'155,155,140',C'0,98,24',clrBlack,8);
       ButtonCreate("Btn_Sell_"+PairInfo[i].Pair,"SELL",x_axis+760,(i*26)+y_axis-1,43,18,C'155,155,140',C'111,0,0',clrBlack,8);
-      
+
       SetText(PairInfo[i].Pair+"_LotsBuy","0000",x_axis+812,(i*26)+y_axis+2,C'68,68,68',8);
       SetText(PairInfo[i].Pair+"_LotsSell","0000",x_axis+852,(i*26)+y_axis+2,C'68,68,68',8);
       SetText(PairInfo[i].Pair+"_OrdersBuy","0",x_axis+899,(i*26)+y_axis+2,C'68,68,68',8);
@@ -200,21 +198,21 @@ int OnInit(){
       SetText(PairInfo[i].Pair+"_SellPrice","0.00",x_axis+1007,(i*26)+y_axis+2,C'68,68,68',8);
       SetText(PairInfo[i].Pair+"_ProfitLoss","0.00",x_axis+1069,(i*26)+y_axis+2,C'68,68,68',8);
       SetText(PairInfo[i].Pair+"_Locked","0.00",x_axis+1132,(i*26)+y_axis+2,C'68,68,68',8);
-      
+
       ButtonCreate("Btn_Lock00_"+PairInfo[i].Pair,"00",x_axis+1198,(i*26)+y_axis-1,25,18,C'155,155,140',C'85,85,85',clrBlack,8);
       ButtonCreate("Btn_Lock25_"+PairInfo[i].Pair,"25",x_axis+1223,(i*26)+y_axis-1,25,18,C'155,155,140',C'85,85,85',clrBlack,8);
       ButtonCreate("Btn_Lock50_"+PairInfo[i].Pair,"50",x_axis+1248,(i*26)+y_axis-1,25,18,C'155,155,140',C'85,85,85',clrBlack,8);
       ButtonCreate("Btn_Lock75_"+PairInfo[i].Pair,"75",x_axis+1273,(i*26)+y_axis-1,25,18,C'155,155,140',C'85,85,85',clrBlack,8);
       ButtonCreate("Btn_Close_"+PairInfo[i].Pair,"CLOSE",x_axis+1304,(i*26)+y_axis-1,53,18,C'155,155,140',C'0,81,162',clrBlack,8);
-      
+
       ButtonCreate("Btn_Manual_"+PairInfo[i].Pair," M",x_axis+1363,(i*26)+y_axis-1,22,18,C'136,136,136',C'53,53,38',clrBlack,7);
       ButtonCreate("Btn_Auto_"+PairInfo[i].Pair," A",x_axis+1388,(i*26)+y_axis-1,22,18,C'136,136,136',C'53,53,38',clrBlack,7);
-      
+
       SetPanel(PairInfo[i].Pair+"_Divider",0,x_axis,(i*26)+y_axis+20,1413,1,C'73,73,73',clrNONE,1);
    }
-   
+
    LoadValues();
-   
+
    return(INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
@@ -227,19 +225,19 @@ void OnDeinit(const int reason){
    //remove dashboard objects
    ObjectDelete(0,"BP");
    ObjectDelete(0,"AccountBar");
-   
+
    ObjectDelete(0,"HeaderBar");
-   
+
    ObjectDelete(0,"AccountBalance");
    ObjectDelete(0,"AccountEquity");
    ObjectDelete(0,"AccountMargin");
    ObjectDelete(0,"AccountRealPL");
    ObjectDelete(0,"AccountUnrealPL");
-   
+
    ObjectDelete(0,"ExpertActive");
    ObjectDelete(0,"LiveTrading");
    ObjectDelete(0,"AutoTrading");
-   
+
    ObjectDelete(0,"SpreadLabel");
    ObjectDelete(0,"GlobalLabel");
    ObjectDelete(0,"TitanLabel");
@@ -253,7 +251,7 @@ void OnDeinit(const int reason){
    ObjectDelete(0,"OvsLabel");
    ObjectDelete(0,"OvbLabel");
    ObjectDelete(0,"HTFTrendLabel");
-   
+
    ObjectDelete(0,"LotsLabel");
    ObjectDelete(0,"LotsBuyLabel");
    ObjectDelete(0,"LotsSellLabel");
@@ -262,16 +260,16 @@ void OnDeinit(const int reason){
    ObjectDelete(0,"OrdersSellLabel");
    ObjectDelete(0,"BuyPriceLabel");
    ObjectDelete(0,"SellPriceLabel");
-   
+
    ObjectDelete(0,"PandLBox");
    ObjectDelete(0,"PandLText");
    ObjectDelete(0,"LockBox");
    ObjectDelete(0,"LockText");
-   
+
    ObjectDelete(0,"LockProfitsLabel");
    ObjectDelete(0,"Btn_Manual");
    ObjectDelete(0,"Btn_Auto");
-   
+
    for(int i=0;i<ArraySize(PairInfo);i++){
       ObjectDelete(0,PairInfo[i].Pair+"_BG");
       ObjectDelete(0,PairInfo[i].Pair+"_Label");
@@ -298,7 +296,7 @@ void OnDeinit(const int reason){
       ObjectDelete(0,PairInfo[i].Pair+"_Label2");
       ObjectDelete(0,"Btn_Buy_"+PairInfo[i].Pair);
       ObjectDelete(0,"Btn_Sell_"+PairInfo[i].Pair);
-      
+
       ObjectDelete(0,PairInfo[i].Pair+"_LotsBuy");
       ObjectDelete(0,PairInfo[i].Pair+"_LotsSell");
       ObjectDelete(0,PairInfo[i].Pair+"_OrdersBuy");
@@ -307,36 +305,36 @@ void OnDeinit(const int reason){
       ObjectDelete(0,PairInfo[i].Pair+"_SellPrice");
       ObjectDelete(0,PairInfo[i].Pair+"_ProfitLoss");
       ObjectDelete(0,PairInfo[i].Pair+"_Locked");
-      
+
       ObjectDelete(0,"Btn_Lock00_"+PairInfo[i].Pair);
       ObjectDelete(0,"Btn_Lock25_"+PairInfo[i].Pair);
       ObjectDelete(0,"Btn_Lock50_"+PairInfo[i].Pair);
       ObjectDelete(0,"Btn_Lock75_"+PairInfo[i].Pair);
       ObjectDelete(0,"Btn_Close_"+PairInfo[i].Pair);
-      
+
       ObjectDelete(0,"Btn_Manual_"+PairInfo[i].Pair);
       ObjectDelete(0,"Btn_Auto_"+PairInfo[i].Pair);
-      
+
       ObjectDelete(0,PairInfo[i].Pair+"_Divider");
    }
-}  
+}
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+
 void OnTimer(){
-   
+
    // update Nitro values
    UpdateNitro();
-   
+
    // update Info
    UpdateInfo();
-   
+
    // update Dashboard
    UpdateDashboard();
-   
+
    // handle Locked Profits
    CloseLocked();
-   
+
    // run Strategy if set to Auto
    //for(int i=0;i<ArraySize(PairInfo);i++){
    //   Command = "none";
@@ -360,10 +358,10 @@ void LoadValues(){
 
    for(int i=0;i<ArraySize(PairInfo);i++){
       fuFilename = "SavedVars\\"+PairInfo[i].Pair+".txt";
-      
+
       if (FileIsExist(fuFilename)){
          fuFilehandle=FileOpen(fuFilename,FILE_READ|FILE_CSV);
-         
+
          PairInfo[i].OpenLotsize = int(FileReadString(fuFilehandle));
          PairInfo[i].TradeDirection = FileReadString(fuFilehandle);
          PairInfo[i].AveragePrice = StringToDouble(FileReadString(fuFilehandle));
@@ -375,11 +373,11 @@ void LoadValues(){
          PairInfo[i].TradeTime = StringToTime(FileReadString(fuFilehandle));
          PairInfo[i].TradePrice = StringToDouble(FileReadString(fuFilehandle));
          PairInfo[i].ManualAuto = FileReadString(fuFilehandle);
-         
+
          FileClose(fuFilehandle);
       }
    }
-   
+
    return;
 }
 
@@ -409,7 +407,7 @@ void SaveValues(){
          FileClose(fuFilehandle);
       }
    }
-   
+
    return;
 }
 
@@ -427,14 +425,14 @@ void UpdateNitro(){
    string fuGlobalText,fuGlobalDirection,fuTitanText,fuTitanDirection,fuSignalStrength;
    string fuRVI,fuOsMA,fuMACD,fuAO;
    int fuADX1,fuADX2,fuCCI1,fuCCI2,fuMFI1,fuMFI2,fuRSI1,fuRSI2,fuSTOCH1,fuSTOCH2,fuWPR1,fuWPR2;
-   
+
    NitroOpen(); // make sure that Nitro is open
-   
+
    for(int i=0;i<ArraySize(PairInfo);i++){ // loop through pairs
-      
+
       PairInfo[i].NitroOBPercentage = 0;
       PairInfo[i].NitroOSPercentage = 0;
-      
+
       // set global percentage
       fuGlobalText = ObjectGetString(NitroChartID,"[WYFX.co][GLOBAL.Percentage.2]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuGlobalText == NULL){
@@ -443,13 +441,13 @@ void UpdateNitro(){
       }
       fuGlobalText = StringSubstr(fuGlobalText,0,StringLen(fuGlobalText)-1);
       PairInfo[i].NitroGlobal = StringToInteger(fuGlobalText);
-      
+
       // set global direction
       fuGlobalDirection = ObjectGetString(NitroChartID,"[WYFX.co][Trend.Direction]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuGlobalDirection == "5") PairInfo[i].NitroGlobalDirection = "up";
          else if (fuGlobalDirection == "6") PairInfo[i].NitroGlobalDirection = "down";
          else PairInfo[i].NitroGlobalDirection = "none";
-      
+
       // set Titan
       fuTitanText = ObjectGetString(NitroChartID,"[WYFX.co][T3.Score.2]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuTitanText == NULL){
@@ -457,13 +455,13 @@ void UpdateNitro(){
          if (fuTitanText == NULL) fuTitanText = ObjectGetString(NitroChartID,"[WYFX.co][T3.Score.3]"+PairInfo[i].Pair,OBJPROP_TEXT);
       }
       PairInfo[i].NitroTitan = StringToInteger(fuTitanText);
-      
+
       // set Titan Direction
       fuTitanDirection = ObjectGetString(NitroChartID,"[WYFX.co][T3.Arrow]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuTitanDirection == "5") PairInfo[i].NitroTitanDirection = "up";
          else if (fuTitanDirection == "6") PairInfo[i].NitroTitanDirection = "down";
          else PairInfo[i].NitroTitanDirection = "none";
-      
+
       // set Signal Strength 1 and 2
       fuSignalStrength = ObjectGetString(NitroChartID,"[WYFX.co][SS.Score]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuSignalStrength == NULL){
@@ -473,25 +471,25 @@ void UpdateNitro(){
          PairInfo[i].NitroSS1 = StringToInteger(StringSubstr(fuSignalStrength,0,1));
          PairInfo[i].NitroSS2 = StringToInteger(StringSubstr(fuSignalStrength,2,1));
       }
-      
+
       // set RVI;
       fuRVI = ObjectGetString(NitroChartID,"[WYFX.co][RVI.Score]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuRVI == "55") PairInfo[i].NitroRVI = "up";
          else if (fuRVI == "66") PairInfo[i].NitroRVI = "down";
          else  PairInfo[i].NitroRVI = "none";
-      
+
       // set OsMA;
       fuOsMA = ObjectGetString(NitroChartID,"[WYFX.co][OsMA.Score]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuOsMA == "55") PairInfo[i].NitroOsMA = "up";
          else if (fuOsMA == "66") PairInfo[i].NitroOsMA = "down";
          else  PairInfo[i].NitroOsMA = "none";
-         
+
       // set MACD;
       fuMACD = ObjectGetString(NitroChartID,"[WYFX.co][MACD.Score]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuMACD == "55") PairInfo[i].NitroMACD = "up";
          else if (fuMACD == "66") PairInfo[i].NitroMACD = "down";
          else  PairInfo[i].NitroMACD = "none";
-      
+
       // set AO;
       fuAO = ObjectGetString(NitroChartID,"[WYFX.co][AO.Score]"+PairInfo[i].Pair,OBJPROP_TEXT);
       if (fuAO == "55") PairInfo[i].NitroAO = "up";
@@ -505,7 +503,7 @@ void UpdateNitro(){
          PairInfo[i].NitroOBPercentage += 8.33;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroADX1 = 0;
-            
+
       // set ADX2
       fuADX2 = ObjectGetInteger(NitroChartID,"[WYFX.co][2:ADX::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuADX2 == 7561050){
@@ -513,7 +511,7 @@ void UpdateNitro(){
          PairInfo[i].NitroOBPercentage += 8.33;
          PairInfo[i].NitroOSPercentage += 8.33;
       }else PairInfo[i].NitroADX2 = 0;
-            
+
       // set CCI1
       fuCCI1 = ObjectGetInteger(NitroChartID,"[WYFX.co][1:CCI::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuCCI1 == 1442032){
@@ -523,7 +521,7 @@ void UpdateNitro(){
          PairInfo[i].NitroCCI1 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroCCI1 = 0;
-      
+
       // set CCI2
       fuCCI2 = ObjectGetInteger(NitroChartID,"[WYFX.co][2:CCI::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuCCI2 == 1442032){
@@ -533,7 +531,7 @@ void UpdateNitro(){
          PairInfo[i].NitroCCI2 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroCCI2 = 0;
-         
+
       // set MFI1
       fuMFI1 = ObjectGetInteger(NitroChartID,"[WYFX.co][1:MFI::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuMFI1 == 1442032){
@@ -543,17 +541,17 @@ void UpdateNitro(){
          PairInfo[i].NitroMFI1 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroMFI1 = 0;
-      
+
       // set MFI2
       fuMFI2 = ObjectGetInteger(NitroChartID,"[WYFX.co][2:MFI::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
-      if (fuMFI2 == 1442032){ 
+      if (fuMFI2 == 1442032){
          PairInfo[i].NitroMFI2 = 1;
          PairInfo[i].NitroOBPercentage += 8.33;
       } else if (fuMFI2 == 15081020) {
          PairInfo[i].NitroMFI2 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroMFI2 = 0;
-      
+
       // set RSI1
       fuRSI1 = ObjectGetInteger(NitroChartID,"[WYFX.co][1:RSI::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuRSI1 == 1442032){
@@ -563,7 +561,7 @@ void UpdateNitro(){
          PairInfo[i].NitroRSI1 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroRSI1 = 0;
-      
+
       // set RSI2
       fuRSI2 = ObjectGetInteger(NitroChartID,"[WYFX.co][2:RSI::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuRSI2 == 1442032){
@@ -573,17 +571,17 @@ void UpdateNitro(){
          PairInfo[i].NitroRSI2 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroRSI2 = 0;
-         
+
       // set STOCH1
       fuSTOCH1 = ObjectGetInteger(NitroChartID,"[WYFX.co][1:STOCH::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
-      if (fuSTOCH1 == 1442032){ 
+      if (fuSTOCH1 == 1442032){
          PairInfo[i].NitroSTOCH1 = 1;
          PairInfo[i].NitroOBPercentage += 8.33;
       } else if (fuSTOCH1 == 15081020) {
          PairInfo[i].NitroSTOCH1 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroSTOCH1 = 0;
-      
+
       // set STOCH2
       fuSTOCH2 = ObjectGetInteger(NitroChartID,"[WYFX.co][2:STOCH::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuSTOCH2 == 1442032){
@@ -593,7 +591,7 @@ void UpdateNitro(){
          PairInfo[i].NitroSTOCH2 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroSTOCH2 = 0;
-         
+
       // set WPR1
       fuWPR1 = ObjectGetInteger(NitroChartID,"[WYFX.co][1:WPR::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuWPR1 == 1442032){
@@ -603,7 +601,7 @@ void UpdateNitro(){
          PairInfo[i].NitroWPR1 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroWPR1 = 0;
-      
+
       // set WPR2
       fuWPR2 = ObjectGetInteger(NitroChartID,"[WYFX.co][2:WPR::matriXx]"+PairInfo[i].Pair,OBJPROP_COLOR);
       if (fuWPR2 == 1442032){
@@ -613,10 +611,10 @@ void UpdateNitro(){
          PairInfo[i].NitroWPR2 = -1;
          PairInfo[i].NitroOSPercentage += 8.33;
       } else PairInfo[i].NitroWPR2 = 0;
-      
+
       PairInfo[i].NitroOSPercentage = MathRound(PairInfo[i].NitroOSPercentage / 10) * 10;
       PairInfo[i].NitroOBPercentage = MathRound(PairInfo[i].NitroOBPercentage / 10) * 10;
-      
+
    }
 
    return;
@@ -631,7 +629,7 @@ long GetNitroChartID(){
    long fuPrevChart = ChartFirst();
    int fuI = 0;
    int fuLimit = 100;
-   
+
    if (ChartSymbol(fuPrevChart) == NitroChart){ // first chart found is nitro chart
       fuNitroChart = fuPrevChart;
    } else {
@@ -646,15 +644,15 @@ long GetNitroChartID(){
          fuI++;
       }
    }
-   
+
    // nitro chart not found.  open new chart and apply template.
    if (fuNitroChart == 0){
       fuNitroChart = ChartOpen(NitroChart,Timeframe);
    }
-   
+
    // apply template to Nitro Chart
    ChartApplyTemplate(fuNitroChart,NitroTemplate);
-   
+
    return fuNitroChart;
 }
 
@@ -666,18 +664,18 @@ string GetOpenTradesDirection(string fuInstrument, int fuArrayId){
    string fuFilename = "FXtrade\\position-"+fuInstrument+".txt";
    string fuDirection;
    double fuAvgPrice = 0;
-   
+
    if (FileIsExist(fuFilename)){
-      
+
       fuFilehandle=FileOpen(fuFilename,FILE_READ|FILE_CSV,",");
       fuDirection = FileReadString(fuFilehandle);
       PairInfo[fuArrayId].OpenLotsize = int(FileReadString(fuFilehandle));
       fuAvgPrice = StringToDouble(FileReadString(fuFilehandle));
       FileClose(fuFilehandle);
-      
+
       PairInfo[fuArrayId].TradeDirection = fuDirection;
       PairInfo[fuArrayId].AveragePrice = fuAvgPrice;
-      
+
       if (fuDirection == "buy"){
          ObjectSetInteger(0,PairInfo[fuArrayId].Pair+"_Label2",OBJPROP_COLOR,clrBlanchedAlmond);
       } else if (fuDirection == "sell"){
@@ -685,7 +683,7 @@ string GetOpenTradesDirection(string fuInstrument, int fuArrayId){
       } else {
          ObjectSetInteger(0,PairInfo[fuArrayId].Pair+"_Label2",OBJPROP_COLOR,C'85,85,85');
       }
-      
+
       return fuDirection;
    } else {
       ObjectSetInteger(0,IntegerToString(fuArrayId)+"Pair1",OBJPROP_BGCOLOR,clrBlack);
@@ -695,45 +693,45 @@ string GetOpenTradesDirection(string fuInstrument, int fuArrayId){
       PairInfo[fuArrayId].Profit = 0;
       PairInfo[fuArrayId].LockLevel = -1;
       PairInfo[fuArrayId].LockProfit = -1;
-      
+
       PairInfo[fuArrayId].TradeDirection = "none";
       return "none";
-   } 
+   }
 }
 
 //+------------------------------------------------------------------+
 //| Update Info                                                      |
 //+------------------------------------------------------------------+
 void UpdateInfo(){
-   
+
    int fuFilehandle;
    string fuFilename;
    double fuRawLots;
    double fuPrice,fuM15Avg,fuH1Avg,fuH4Avg,fuD1Avg;
-   
+
    // update account information
    fuFilename = "FXtrade\\account.txt";
    if (FileIsExist(fuFilename)){
       fuFilehandle=FileOpen(fuFilename,FILE_READ|FILE_CSV,",");
-      
+
       AccountBal =      StrToDouble(FileReadString(fuFilehandle));
       NumOpenTrades =   StrToInteger(FileReadString(fuFilehandle));
       AvailMargin =     StrToDouble(FileReadString(fuFilehandle));
       UsedMargin =      StrToDouble(FileReadString(fuFilehandle));
       RealizedPL =      StrToDouble(FileReadString(fuFilehandle));
-      
+
       FileClose(fuFilehandle);
    }
-   
+
    // update minmax values
    for(int i=0;i<ArraySize(PairInfo);i++){
       fuFilename = "FXtrade\\minmax-"+PairInfo[i].FXtradeName+".txt";
       if (FileIsExist(fuFilename)){
          fuFilehandle=FileOpen(fuFilename,FILE_READ|FILE_CSV,",");
-         
+
          PairInfo[i].MinPrice = StrToDouble(FileReadString(fuFilehandle));
          PairInfo[i].MaxPrice = StrToDouble(FileReadString(fuFilehandle));
-         
+
          FileClose(fuFilehandle);
       } else {
          PairInfo[i].OpenLotsize = 0;
@@ -741,11 +739,11 @@ void UpdateInfo(){
          PairInfo[i].MaxPrice = 0;
       }
       GetOpenTradesDirection(PairInfo[i].FXtradeName,i);
-      
+
       fuRawLots = NormalizeDouble(AccountBal / 3,0);
 
    }
-   
+
    // update trend directions
    for(int i=0;i<ArraySize(PairInfo);i++){
       PairInfo[i].M15Trend = "none";
@@ -766,7 +764,7 @@ void UpdateInfo(){
       if(fuPrice > fuD1Avg) PairInfo[i].D1Trend = "up";
          else if (fuPrice < fuD1Avg) PairInfo[i].D1Trend = "down";
    }
-   
+
    return;
 }
 
@@ -774,27 +772,27 @@ void UpdateInfo(){
 //| Update Dashboard                                                 |
 //+------------------------------------------------------------------+
 void UpdateDashboard(){
-   
+
    double fuProfit;
    double fuTotalProfit = 0;
    double fuTotalLocked = 0;
    bool  fuLocked = false;
    int fuOrderCount = 0;
    string StrLots;
-   
+
    ObjectSetText("AccountBalance","Account Balance: $"+DoubleToStr(AccountBal,2),7,NULL,C'136,136,136');
    ObjectSetText("AccountMargin","Margin Used / Avail: $"+DoubleToStr(UsedMargin,2)+" / $"+DoubleToStr(AvailMargin,2),7,NULL,C'136,136,136');
    ObjectSetText("AccountRealPL","Realized P/L: $"+DoubleToStr(RealizedPL,2),7,NULL,C'136,136,136');
-   
+
    if (IsConnected() == true) ObjectSetInteger(0,"ExpertActive",OBJPROP_BGCOLOR,C'147,255,38');
       else ObjectSetInteger(0,"ExpertActive",OBJPROP_BGCOLOR,C'255,0,0');
    if (IsExpertEnabled() == true) ObjectSetInteger(0,"LiveTrading",OBJPROP_BGCOLOR,C'147,255,38');
       else ObjectSetInteger(0,"LiveTrading",OBJPROP_BGCOLOR,C'255,0,0');
    if (IsTradeAllowed() == true) ObjectSetInteger(0,"AutoTrading",OBJPROP_BGCOLOR,C'147,255,38');
       else ObjectSetInteger(0,"AutoTrading",OBJPROP_BGCOLOR,C'255,0,0');
-   
+
    for(int i=0;i<ArraySize(PairInfo);i++){
-      
+
       // Background
       if ((PairInfo[i].NitroGlobalDirection == "up")&&
          (PairInfo[i].NitroTitanDirection == "up")&&
@@ -815,10 +813,10 @@ void UpdateDashboard(){
       } else {
          ObjectSetInteger(0,PairInfo[i].Pair+"_BG",OBJPROP_BGCOLOR,clrBlack); // black
       }
-      
+
       // Spread
       ObjectSetText(PairInfo[i].Pair+"_Spread",DoubleToStr(MarketInfo(PairInfo[i].Pair,MODE_SPREAD)/10,1),9,NULL,clrOrange);
-      
+
       // Global
       if (PairInfo[i].NitroGlobalDirection == "up"){
          ObjectSetString(0,PairInfo[i].Pair+"_GlobalArrow",OBJPROP_BMPFILE,0,ArrowUp);
@@ -830,7 +828,7 @@ void UpdateDashboard(){
          ObjectSetString(0,PairInfo[i].Pair+"_GlobalArrow",OBJPROP_BMPFILE,0,Neutral);
          ObjectSetText(PairInfo[i].Pair+"_Global",IntegerToString(PairInfo[i].NitroGlobal),9,NULL,C'68,68,68');
       }
-      
+
       // Titan
       if (PairInfo[i].NitroTitanDirection == "up"){
          ObjectSetString(0,PairInfo[i].Pair+"_TitanArrow",OBJPROP_BMPFILE,0,ArrowUp);
@@ -842,36 +840,36 @@ void UpdateDashboard(){
          ObjectSetString(0,PairInfo[i].Pair+"_TitanArrow",OBJPROP_BMPFILE,0,Neutral);
          ObjectSetText(PairInfo[i].Pair+"_Titan",IntegerToString(PairInfo[i].NitroTitan),9,NULL,C'68,68,68');
       }
-      
+
       // Strength
       ObjectSetText(PairInfo[i].Pair+"_Strength",IntegerToString(PairInfo[i].NitroSS1)+" "+IntegerToString(PairInfo[i].NitroSS2),9,NULL,C'147,255,38');
-      
+
       // RVI
       if (PairInfo[i].NitroRVI == "up") ObjectSetString(0,PairInfo[i].Pair+"_RVIArrow",OBJPROP_BMPFILE,0,ArrowUp);
          else if (PairInfo[i].NitroRVI == "down") ObjectSetString(0,PairInfo[i].Pair+"_RVIArrow",OBJPROP_BMPFILE,0,ArrowDown);
          else  ObjectSetString(0,PairInfo[i].Pair+"_RVIArrow",OBJPROP_BMPFILE,0,Neutral);
-      
+
       // MA
       if (PairInfo[i].NitroOsMA == "up") ObjectSetString(0,PairInfo[i].Pair+"_MAArrow",OBJPROP_BMPFILE,0,ArrowUp);
          else if (PairInfo[i].NitroOsMA == "down") ObjectSetString(0,PairInfo[i].Pair+"_MAArrow",OBJPROP_BMPFILE,0,ArrowDown);
          else  ObjectSetString(0,PairInfo[i].Pair+"_MAArrow",OBJPROP_BMPFILE,0,Neutral);
-      
+
       // MA
       if (PairInfo[i].NitroMACD == "up") ObjectSetString(0,PairInfo[i].Pair+"_MACDArrow",OBJPROP_BMPFILE,0,ArrowUp);
          else if (PairInfo[i].NitroMACD == "down") ObjectSetString(0,PairInfo[i].Pair+"_MACDArrow",OBJPROP_BMPFILE,0,ArrowDown);
          else  ObjectSetString(0,PairInfo[i].Pair+"_MACDArrow",OBJPROP_BMPFILE,0,Neutral);
-      
+
       // AO
       if (PairInfo[i].NitroAO == "up") ObjectSetString(0,PairInfo[i].Pair+"_AOArrow",OBJPROP_BMPFILE,0,ArrowUp);
          else if (PairInfo[i].NitroAO == "down") ObjectSetString(0,PairInfo[i].Pair+"_AOArrow",OBJPROP_BMPFILE,0,ArrowDown);
          else  ObjectSetString(0,PairInfo[i].Pair+"_AOArrow",OBJPROP_BMPFILE,0,Neutral);
-         
+
       // ADX
       if (PairInfo[i].NitroADX1 == 2) ObjectSetInteger(0,PairInfo[i].Pair+"_ADX1",OBJPROP_BGCOLOR,C'38,201,255');
          else ObjectSetInteger(0,PairInfo[i].Pair+"_ADX1",OBJPROP_BGCOLOR,clrNONE);
       if (PairInfo[i].NitroADX2 == 2) ObjectSetInteger(0,PairInfo[i].Pair+"_ADX2",OBJPROP_BGCOLOR,C'38,201,255');
          else ObjectSetInteger(0,PairInfo[i].Pair+"_ADX2",OBJPROP_BGCOLOR,clrNONE);
-      
+
       // Oversold
       if (PairInfo[i].NitroOSPercentage >= 50) ObjectSetText(PairInfo[i].Pair+"_Oversold",IntegerToString(PairInfo[i].NitroOSPercentage),9,NULL,C'38,201,255');
          else if (PairInfo[i].NitroOSPercentage > 10) ObjectSetText(PairInfo[i].Pair+"_Oversold",IntegerToString(PairInfo[i].NitroOSPercentage),9,NULL,C'100,100,255');
@@ -880,7 +878,7 @@ void UpdateDashboard(){
       if (PairInfo[i].NitroOBPercentage >= 50) ObjectSetText(PairInfo[i].Pair+"_Overbought",IntegerToString(PairInfo[i].NitroOBPercentage),9,NULL,C'38,201,255');
          else if (PairInfo[i].NitroOBPercentage > 10) ObjectSetText(PairInfo[i].Pair+"_Overbought",IntegerToString(PairInfo[i].NitroOBPercentage),9,NULL,C'100,100,255');
          else ObjectSetText(PairInfo[i].Pair+"_Overbought"," 0",9,NULL,C'68,68,68');
-      
+
       // HTF Trends
       if (PairInfo[i].M15Trend == "up") ObjectSetString(0,PairInfo[i].Pair+"_M15Arrow",OBJPROP_BMPFILE,0,ArrowUp);
          else if (PairInfo[i].M15Trend == "down") ObjectSetString(0,PairInfo[i].Pair+"_M15Arrow",OBJPROP_BMPFILE,0,ArrowDown);
@@ -894,7 +892,7 @@ void UpdateDashboard(){
       if (PairInfo[i].D1Trend == "up") ObjectSetString(0,PairInfo[i].Pair+"_D1Arrow",OBJPROP_BMPFILE,0,ArrowUp);
          else if (PairInfo[i].D1Trend == "down") ObjectSetString(0,PairInfo[i].Pair+"_D1Arrow",OBJPROP_BMPFILE,0,ArrowDown);
          else ObjectSetString(0,PairInfo[i].Pair+"_D1Arrow",OBJPROP_BMPFILE,0,Neutral);
-      
+
       // Manual Auto
       if (PairInfo[i].ManualAuto == "auto"){
          ObjectSetInteger(0,"Btn_Auto_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'0,98,24');
@@ -907,9 +905,9 @@ void UpdateDashboard(){
          ObjectSetInteger(0,"Btn_Auto_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'53,53,38');
          ObjectSetInteger(0,"Btn_Manual_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'0,98,24');
       }
-      
+
       fuProfit = 0;
-      
+
       // Profit and Loss
       if(PairInfo[i].TradeDirection == "buy"){
          fuProfit = MarketInfo(PairInfo[i].Pair, MODE_TICKVALUE) * PairInfo[i].OpenLotsize * (MarketInfo(PairInfo[i].Pair,MODE_BID) - PairInfo[i].AveragePrice);
@@ -919,10 +917,10 @@ void UpdateDashboard(){
       if (StringFind(PairInfo[i].Pair,"JPY") >= 0){
          fuProfit = fuProfit / 100;
       }
-      
+
       fuTotalProfit += fuProfit;
       PairInfo[i].Profit = fuProfit;
-      
+
       // Units
       if (PairInfo[i].OpenLotsize > 0){
          fuOrderCount++;
@@ -952,7 +950,7 @@ void UpdateDashboard(){
          if (fuProfit > 0) ObjectSetText(PairInfo[i].Pair+"_ProfitLoss",DoubleToStr(MathAbs(fuProfit),2),8,NULL,C'147,255,38');
                else if (fuProfit == 0) ObjectSetText(PairInfo[i].Pair+"_ProfitLoss","0.00",8,NULL,C'147,255,38');
                else  ObjectSetText(PairInfo[i].Pair+"_ProfitLoss",DoubleToStr(MathAbs(fuProfit),2),8,NULL,C'255,0,0');
-         
+
          // lock level price
          if ((PairInfo[i].LockLevel > -1)&&(PairInfo[i].LockProfit != -1)){
             ObjectSetText(PairInfo[i].Pair+"_Locked",DoubleToStr(PairInfo[i].LockProfit,2),8,NULL,C'147,255,38');
@@ -961,7 +959,7 @@ void UpdateDashboard(){
          } else {
             ObjectSetText(PairInfo[i].Pair+"_Locked","0,00",8,NULL,C'68,68,68');
          }
-         
+
          // lock level buttons
             ObjectSetInteger(0,"Btn_Lock00_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'85,85,85');
             ObjectSetInteger(0,"Btn_Lock25_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'85,85,85');
@@ -976,7 +974,7 @@ void UpdateDashboard(){
          } else if (PairInfo[i].LockLevel == 75){
             ObjectSetInteger(0,"Btn_Lock75_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'0,81,162');
          }
-         
+
       } else {
          ObjectSetText(PairInfo[i].Pair+"_LotsSell","0000",8,NULL,C'68,68,68');
          ObjectSetText(PairInfo[i].Pair+"_LotsBuy","0000",8,NULL,C'68,68,68');
@@ -992,7 +990,7 @@ void UpdateDashboard(){
          ObjectSetInteger(0,"Btn_Lock50_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'85,85,85');
          ObjectSetInteger(0,"Btn_Lock75_"+PairInfo[i].Pair,OBJPROP_BGCOLOR,C'85,85,85');
       }
-      
+
    }
    if (fuOrderCount > 0){
       if (fuTotalProfit > 0) ObjectSetText("PandLText",DoubleToStr(fuTotalProfit,2),8,NULL,C'147,255,38');
@@ -1004,9 +1002,9 @@ void UpdateDashboard(){
       ObjectSetText("PandLText","0.00",8,NULL,C'68,68,68');
       ObjectSetText("LockText","0.00",8,NULL,C'68,68,68');
    }
-   
+
    ObjectSetText("AccountEquity","Equity: $"+DoubleToStr(AccountBal+fuTotalProfit,2),7,NULL,C'136,136,136');
-   
+
    return;
 }
 
@@ -1015,12 +1013,12 @@ void UpdateDashboard(){
 //================================================//
 void OpenChart(string fuPair,int fuTimeframe){
    long fuChartID;
-   
+
    fuChartID = ChartOpen(fuPair,fuTimeframe);
    if (fuChartID > 0){
       ChartApplyTemplate(fuChartID, "Candles.tpl");
    }
-   
+
    return;
 }
 
@@ -1103,14 +1101,14 @@ void CloseLocked(){
 void RunStrategyCommand(string fuPair, int fuArrayID, string fuCommand){
    int fuUnits = 0;
    double fuProfits = 0.0;
-   
+
    // close entire position
    if (fuCommand == "ClosePosition"){
       SendNotification(PairInfo[fuArrayID].Pair+" "+PairInfo[fuArrayID].TradeDirection+" closed: $"+DoubleToStr(PairInfo[fuArrayID].Profit,2));
       PairInfo[fuArrayID].TradePrice = 0;
       ClosePosition(PairInfo[fuArrayID].FXtradeName);
    }
-   
+
    // partial close
    if (StringSubstr(fuCommand,0,12) == "PartialClose"){ // ex. PartialClose-500 (500 units)
       fuUnits = StringToInteger(StringSubstr(fuCommand,13,StringLen(fuCommand)));
@@ -1126,7 +1124,7 @@ void RunStrategyCommand(string fuPair, int fuArrayID, string fuCommand){
          }
       }
    }
-   
+
    // reverse position
    if (StringSubstr(fuCommand,0,15) == "ReversePosition"){ // ReversePosition-200 (200 units)
       fuUnits = StringToInteger(StringSubstr(fuCommand,16,StringLen(fuCommand)));
@@ -1141,20 +1139,20 @@ void RunStrategyCommand(string fuPair, int fuArrayID, string fuCommand){
             Sleep(1000);
             OpenMarketOrder(PairInfo[fuArrayID].FXtradeName, "buy", fuUnits);
          }
-      }                 
+      }
    }
-   
+
    // set to break even
    if (fuCommand == "SetToBreakeven"){
       if (SetLockPrice(fuPair,fuArrayID,0)) PairInfo[fuArrayID].LockLevel = 999;
    }
-   
+
    // lock in profits
    if (StringSubstr(fuCommand,0,10) == "LockProfit"){ // ex. LockProfit-200 (2.00)
       fuProfits = StringToDouble(StringSubstr(fuCommand,11,StringLen(fuCommand)));
       if (SetLockPrice(fuPair,fuArrayID,fuProfits)) PairInfo[fuArrayID].LockLevel = 999;
    }
-   
+
    // buy
    if (StringSubstr(fuCommand,0,3) == "Buy"){ // ex. Buy-200 (200 Units)
       fuUnits = StringToInteger(StringSubstr(fuCommand,4,StringLen(fuCommand)));
@@ -1164,7 +1162,7 @@ void RunStrategyCommand(string fuPair, int fuArrayID, string fuCommand){
          }
       }
    }
-   
+
    // sell
    if (StringSubstr(fuCommand,0,4) == "Sell"){ // ex. Sell-200 (200 Units)
       fuUnits = StringToInteger(StringSubstr(fuCommand,5,StringLen(fuCommand)));
@@ -1316,7 +1314,7 @@ bool ButtonCreate(const string            name="Button",            // button na
                   const int               font_size=10,             // font size
                   const ENUM_BASE_CORNER  corner=CORNER_LEFT_UPPER, // chart corner for anchoring
                   const string            font="Arial",             // font
-                  
+
                   const bool              back=false,               // in the background
                   const bool              selection=false,          // highlight to move
                   const bool              state=false,              // pressed/released
@@ -1570,6 +1568,6 @@ void OnChartEvent(const int id,  const long &lparam, const double &dparam,  cons
          ObjectSetInteger(0,sparam,OBJPROP_STATE,false);
          ChartRedraw();
       }
-      
+
    }
 }
