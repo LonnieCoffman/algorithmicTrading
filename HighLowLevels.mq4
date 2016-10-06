@@ -1,10 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                HighLowLevels.mq4 |
-//|                        Copyright 2016, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
+//|                                   Copyright 2016, Lonnie Coffman |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2016, MetaQuotes Software Corp."
-#property link      "https://www.mql5.com"
+#property copyright "Copyright 2016, Lonnie Coffman"
 #property version   "1.00"
 #property strict
 
@@ -50,9 +48,9 @@ void OnTimer(){
    bool OpenOrder = false;
    // a new bar has formed
    if(BarTime != iTime(Symbol(),Period(),0)){
-      
+
       if ((Hour() == 22)&&(Minute() > 43)&&(Minute() < 52)){ // open new trades
-         // if there is not a trade open.... 
+         // if there is not a trade open....
          for (i = 0; i < OrdersTotal(); i++){
             if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES)){
                if (((OrderType() == OP_BUY)||(OrderType() == OP_SELL)) && (Symbol() == OrderSymbol()) && (OrderMagicNumber() == MagicNumber)) OpenOrder = true;
@@ -65,10 +63,10 @@ void OnTimer(){
       } else {
          FindLevels(Symbol(),Period());
       }
-      
+
       BarTime = iTime(Symbol(),Period(),0);
    }
-   
+
 }
 //+------------------------------------------------------------------+
 
@@ -164,7 +162,7 @@ void FindLevels(string fPair, int fPeriod, bool fTrade = false){
          }
       }
    }
-   
+
    if (fTrade){
       if ((HighRes - LowRes) > (HighSup - LowSup)){ // go long
          OpenTrade("long");
@@ -172,7 +170,7 @@ void FindLevels(string fPair, int fPeriod, bool fTrade = false){
          OpenTrade("short");
       }
    }
-   
+
    return;
 }
 
@@ -201,25 +199,25 @@ int ClosePositions(string fuPair, bool fuCloseBuy, bool fuCloseSell, int fuMagic
    bool order;
    int ordticket[100][2];
    int i;
-   
+
    // build an array of orders for this pair
    for (i = 0; i < orderstotal; i++){
       OrderSelect(i, SELECT_BY_POS, MODE_TRADES);
-     
+
       if (OrderMagicNumber() != fuMagicNumber || OrderSymbol() != fuPair)
          continue;
-     
+
       int orderType = OrderType();
       if (orderType != OP_BUY && orderType != OP_SELL)
          continue;
-     
+
       ordticket[orders][0] = OrderOpenTime();
       ordticket[orders][1] = OrderTicket();
       orders++;
    }
-    
+
    ArrayResize(ordticket,orders);
-   
+
    for (i = 0; i < orders; i++){
       if(OrderSelect(ordticket[i][1], SELECT_BY_TICKET)==true){
          // buy order found. does it need to be closed?
@@ -238,7 +236,7 @@ int ClosePositions(string fuPair, bool fuCloseBuy, bool fuCloseSell, int fuMagic
          }
       }
    }
-   
+
    return NULL;
 }
 
